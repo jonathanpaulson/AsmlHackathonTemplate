@@ -59,10 +59,29 @@ int fix_col(int c) {
 //! Update display
 void Example::execute()
 {
-   m_lmd.clear();
+
+   int n = m_nodes.size();
+   int my_idx = 0;
+   for(auto& node : m_nodes) {
+     if(node == m_mesh.getMyNodeId()) {
+       break;
+     }
+     my_idx++;
+   }
+   String pat;
    for(int r=0; r<PAT_HEIGHT; r++) {
      for(int c=0; c<PAT_WIDTH; c++) {
-       m_lmd.setPixel(fix_col(c), r, m_pattern[r][c]);
+       pat += (m_pattern[r][c] ? "1" : "0");
+     }
+   }
+   MY_DEBUG_PRINTF("Execute me=%u n=%d my_idx=%d pattern=%s\n", m_mesh.getMyNodeId(), n, my_idx, pat.c_str());
+
+   m_lmd.clear();
+   for(int r=0; r<PAT_HEIGHT*n; r++) {
+     for(int c=0; c<PAT_WIDTH*n; c++) {
+       if(r/8 == my_idx) {
+	       m_lmd.setPixel(fix_col(c), r%8, m_pattern[r/n][c/n]);
+       }
      }
    }
    m_lmd.display();
@@ -85,11 +104,25 @@ String remove_prefix(String& msg, String& prefix) {
   }
   return ans;
 }
+uint32_t to_int(String& msg) {
+  uint32_t ans = 0;
+  for(unsigned i=0; i<msg.length(); i++) {
+    ans = ans*10 + (msg[i]-'0');
+  }
+  return ans;
+}
 
 void Example::receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg)
 {
-   String prefix("PATTERN ");
    MY_DEBUG_PRINTF("Data received. me=%u sender=%u msg=%s\n", m_mesh.getMyNodeId(), nodeId, msg.c_str());
+
+   String node_prefix("NODE ");
+   if(has_prefix(msg, node_prefix)) {
+     String nodeid = remove_prefix(msg, node_prefix);
+     m_nodes.insert(to_int(nodeid));
+   }
+
+   String prefix("PATTERN ");
    if(has_prefix(msg, prefix)) { 
      String pattern = remove_prefix(msg, prefix);
      assert(pattern.length() == 64);

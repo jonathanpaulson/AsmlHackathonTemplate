@@ -17,6 +17,7 @@
 
 #include <functional>
 #include <vector>
+#include <set>
 
 // Forward declarations.
 namespace Facilities { class MeshNetwork; }
@@ -51,6 +52,7 @@ private:
    Facilities::MeshNetwork& m_mesh;
    LEDMatrixDriver m_lmd;
 
+   std::set<uint32_t> m_nodes;
    vector<vector<int>> m_pattern;
 
    void receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg);
