@@ -11,6 +11,7 @@
 
 #include "Debug.hpp"
 #include "painlessMesh.h"
+#include <cassert>
 
 #ifdef ESP8266
 #include "Hash.h"
@@ -19,6 +20,43 @@
 #include <AsyncTCP.h>
 #endif
 #include <ESPAsyncWebServer.h>
+
+uint32_t to_int(String& msg) {
+  uint32_t ans = 0;
+  for(unsigned i=0; i<msg.length(); i++) {
+    ans = ans*10 + (msg[i]-'0');
+  }
+  return ans;
+}
+String to_string(uint32_t n) {
+  if(n == 0) {
+    return "";
+  }
+  String ans = "";
+  while(n > 0) {
+	  ans = ('0' + (n%10)) + ans;
+  }
+	return ans;
+}
+bool has_prefix(String& msg, String& prefix) {
+  if(msg.length() < prefix.length()) { return false; }
+  for(unsigned i=0; i<prefix.length(); i++) {
+    if(msg[i] != prefix[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+String remove_prefix(String& msg, String& prefix) {
+  assert(has_prefix(msg, prefix));
+  String ans = "";
+  for(unsigned i=prefix.length(); i<msg.length(); i++) {
+    ans += msg[i];
+  }
+  return ans;
+}
+
+
 
 namespace Facilities {
 
@@ -46,10 +84,16 @@ void MeshNetwork::initialize(const __FlashStringHelper *prefix, const __FlashStr
 	   String msg = "";
        if (request->hasArg("BROADCAST")){
          msg = request->arg("BROADCAST");
-         m_mesh.sendBroadcast(msg);
+         m_mesh.sendBroadcast(msg, true);
        }
        request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='BROADCAST' value='" + msg + "'><br><br><input type='submit' value='Submit'></form>");
    });
+   server.on("/debug", HTTP_GET, [&](AsyncWebServerRequest *request){
+     request->send(200, "text/html", "Frame Rate: 100hz\nMissed Frames: 0\nAnimation time: 10s\nNodes:" + to_string(m_nodes.size()) + "\nHistory:\n" + m_history);
+   });
+
+   //Amount of nodes actively functioning.
+   //History record of removed and added nodes since the system became active (i.e. running with at least one node).
    
    server.begin();
 }
@@ -76,9 +120,20 @@ void MeshNetwork::onReceive(receivedCallback_t receivedCallback)
    m_mesh.onReceive(receivedCallback);
 }
 
+set<MeshNetwork::NodeId> MeshNetwork::getNodes() { return m_nodes; }
+
 void MeshNetwork::receivedCb(NodeId transmitterNodeId, String& msg)
 {
    MY_DEBUG_PRINTF("Data received from node: %u; msg: %s\n", transmitterNodeId, msg.c_str());
+   String node_prefix("NODE ");
+   if(has_prefix(msg, node_prefix)) {
+     String nodeid_s = remove_prefix(msg, node_prefix);
+     NodeId nodeid = to_int(nodeid_s);
+     if(m_nodes.count(nodeid) == 0) {
+       m_history += "Node joined the mesh: " + nodeid_s;
+       m_nodes.insert(nodeid);
+     }
+   }
 }
 
 

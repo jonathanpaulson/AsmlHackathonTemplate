@@ -39,8 +39,7 @@ public:
    void execute();
 
 private:
-   static const int PAT_WIDTH;
-   static const int PAT_HEIGHT;
+   static const int SQ;
 
    static const int LEDMATRIX_WIDTH;
    static const int LEDMATRIX_HEIGHT;
@@ -52,8 +51,7 @@ private:
    Facilities::MeshNetwork& m_mesh;
    LEDMatrixDriver m_lmd;
 
-   std::set<uint32_t> m_nodes;
-   vector<vector<int>> m_pattern;
+   vector<vector<vector<int>>> m_pattern;
 
    void receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg);
    void changedConnections();

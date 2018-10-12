@@ -11,6 +11,12 @@
 
 #include "painlessMesh.h"
 #include <functional>
+#include <set>
+
+uint32_t to_int(String& msg);
+String to_string(uint32_t n);
+bool has_prefix(String& msg, String& prefix);
+String remove_prefix(String& msg, String& prefix);
 
 namespace Facilities {
 
@@ -33,6 +39,7 @@ public:
 
    void sendBroadcast(String& message, bool include_self);
    NodeId getMyNodeId();
+   set<NodeId> getNodes();
 
    void onReceive(receivedCallback_t receivedCallback);
    void onChangedConnections();
@@ -41,6 +48,8 @@ public:
 
 private:
    static const uint16_t PORT;
+   set<uint32_t> m_nodes;
+   String m_history;
 
    painlessMesh       m_mesh;
 
