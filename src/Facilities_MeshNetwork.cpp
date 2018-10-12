@@ -12,10 +12,18 @@
 #include "Debug.hpp"
 #include "painlessMesh.h"
 
+#ifdef ESP8266
+#include "Hash.h"
+#include <ESPAsyncTCP.h>
+#else
+#include <AsyncTCP.h>
+#endif
+#include <ESPAsyncWebServer.h>
 
 namespace Facilities {
 
 const uint16_t MeshNetwork::PORT = 5555;
+AsyncWebServer server(80);
 
 //! Construct only.
 //! \note Does not construct and initialize in one go to be able to initialize after serial debug port has been opened.
@@ -33,6 +41,17 @@ void MeshNetwork::initialize(const __FlashStringHelper *prefix, const __FlashStr
    // Set debug messages before init() so that you can see startup messages.
    m_mesh.setDebugMsgTypes( ERROR | STARTUP );  // To enable all: ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE
    m_mesh.init( prefix, password, &taskScheduler, MeshNetwork::PORT );
+   
+   server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
+	   String msg = "";
+       if (request->hasArg("BROADCAST")){
+         msg = request->arg("BROADCAST");
+         m_mesh.sendBroadcast(msg);
+       }
+       request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='BROADCAST' value='" + msg + "'><br><br><input type='submit' value='Submit'></form>");
+   });
+   
+   server.begin();
 }
 
 //! Update mesh; forward call to painlessMesh.
