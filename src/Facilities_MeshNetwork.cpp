@@ -41,10 +41,10 @@ void MeshNetwork::update()
    m_mesh.update();
 }
 
-void MeshNetwork::sendBroadcast(String &message)
+void MeshNetwork::sendBroadcast(String &message, bool include_self)
 {
    MY_DEBUG_PRINT("Broadcasting message: "); MY_DEBUG_PRINTLN(message);
-   m_mesh.sendBroadcast(message, false); // false: Do not include self.
+   m_mesh.sendBroadcast(message, include_self);
 }
 
 MeshNetwork::NodeId MeshNetwork::getMyNodeId()

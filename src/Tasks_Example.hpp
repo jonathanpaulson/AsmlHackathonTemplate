@@ -6,15 +6,17 @@
 //
 //! Example Task
 
-#ifndef __Tasks_ExampleDisplayTask__
-#define __Tasks_ExampleDisplayTask__
+#ifndef __Tasks_Example__
+#define __Tasks_Example__
 
 #include "Facilities_MeshNetwork.hpp"
+#include "Debug.hpp"
 
 #include <painlessMesh.h>
 #include <LEDMatrixDriver.hpp>
 
 #include <functional>
+#include <vector>
 
 // Forward declarations.
 namespace Facilities { class MeshNetwork; }
@@ -22,20 +24,23 @@ namespace Facilities { class MeshNetwork; }
 
 namespace Tasks {
 
-class ExampleDisplayTask : public Task
+class Example : public Task
 {
 public:
-   explicit ExampleDisplayTask(Facilities::MeshNetwork& mesh);
-   ~ExampleDisplayTask() {};
+   explicit Example(Facilities::MeshNetwork& mesh);
+   ~Example() {};
 
    // Disallow copy-ing
-	ExampleDisplayTask(const ExampleDisplayTask& other) = delete;
-	ExampleDisplayTask(ExampleDisplayTask&& other) = delete;
-	ExampleDisplayTask& operator=(const ExampleDisplayTask& other) = delete;
+	Example(const Example& other) = delete;
+	Example(Example&& other) = delete;
+	Example& operator=(const Example& other) = delete;
 
    void execute();
 
 private:
+   static const int PAT_WIDTH;
+   static const int PAT_HEIGHT;
+
    static const int LEDMATRIX_WIDTH;
    static const int LEDMATRIX_HEIGHT;
    static const int LEDMATRIX_SEGMENTS;
@@ -46,13 +51,12 @@ private:
    Facilities::MeshNetwork& m_mesh;
    LEDMatrixDriver m_lmd;
 
-   int m_x;
+   vector<vector<int>> m_pattern;
 
    void receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg);
-
-
+   void changedConnections();
 };
 
 } // namespace Tasks
 
-#endif //  __Tasks_ExampleDisplayTask__
+#endif //  __Tasks_Example__

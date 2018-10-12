@@ -31,10 +31,11 @@ public:
    void update();
    void initialize(const __FlashStringHelper *prefix, const __FlashStringHelper *password, Scheduler& taskScheduler);
 
-   void sendBroadcast(String& message);
+   void sendBroadcast(String& message, bool include_self);
    NodeId getMyNodeId();
 
    void onReceive(receivedCallback_t receivedCallback);
+   void onChangedConnections();
 
 
 
