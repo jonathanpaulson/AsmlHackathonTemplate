@@ -13,6 +13,7 @@
 #include <functional>
 #include <set>
 #include <map>
+#include <list>
 
 uint32_t to_int(String& msg);
 String to_string(uint32_t n);
@@ -40,25 +41,15 @@ public:
 
    void sendBroadcast(String& message, bool include_self);
    NodeId getMyNodeId();
-   set<NodeId> getNodes();
+   std::list<NodeId> getNodeList();
    uint32_t getNodeTime();
 
    void onReceive(receivedCallback_t receivedCallback);
    void onChangedConnections();
-   void receivedCb(NodeId transmitterNodeId, String& msg);
-
-
 
 private:
    static const uint16_t PORT;
-   set<uint32_t> m_nodes;
-   std::map<uint32_t, uint32_t> m_node_times;
-   String m_history;
-
    painlessMesh       m_mesh;
-
-
-
 };
 
 } // namespace Facilities

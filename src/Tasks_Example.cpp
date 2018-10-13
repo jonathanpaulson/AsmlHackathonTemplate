@@ -28,7 +28,7 @@ const unsigned long Example::POLL_DELAY_MS = 100;
 
 //! Initializes the LED Matrix display.
 Example::Example(Facilities::MeshNetwork& mesh) :
-   Task(50 /*ms*/, TASK_FOREVER, std::bind(&Example::execute, this)),
+   Task(100 /*ms*/, TASK_FOREVER, std::bind(&Example::execute, this)),
    m_mesh(mesh),
    m_lmd(LEDMATRIX_SEGMENTS, LEDMATRIX_CS_PIN)
 {
@@ -79,7 +79,11 @@ int fix_col(int c) {
 //! Update display
 void Example::execute()
 {
-   std::set<uint32_t> nodes = m_mesh.getNodes();
+
+   std::list<uint32_t> nodes_list = m_mesh.getNodeList(); 
+   std::set<uint32_t> nodes(nodes_list.begin(), nodes_list.end());
+   nodes.insert(m_mesh.getMyNodeId());
+
    int n = nodes.size();
    int my_idx = 0;
    for(auto& node : nodes) {
@@ -92,7 +96,7 @@ void Example::execute()
    int i_sz = static_cast<int>(m_intensities.size());
 
    uint32_t now = m_mesh.getNodeTime();
-   int frame = (now / (1000*10)) % (2*i_sz);
+   int frame = (now / (1000*100)) % (2*i_sz);
    assert(frame < 2*i_sz);
    int intensity = m_intensities[frame % i_sz];
 
@@ -151,8 +155,6 @@ void Example::receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg)
      String pattern = remove_prefix(msg, prefix_b);
      read_pattern(m_pattern[1], pattern);
    }
-
-   m_mesh.receivedCb(nodeId, msg);
 }
 
 } // namespace Tasks
