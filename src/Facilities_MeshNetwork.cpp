@@ -62,6 +62,7 @@ String remove_prefix(String& msg, String& prefix) {
 namespace Facilities {
 
 const uint16_t MeshNetwork::PORT = 5555;
+AsyncWebServer server(80);
 
 //! Construct only.
 //! \note Does not construct and initialize in one go to be able to initialize after serial debug port has been opened.
