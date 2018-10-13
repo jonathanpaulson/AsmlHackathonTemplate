@@ -20,6 +20,7 @@
 #include <AsyncTCP.h>
 #endif
 #include <ESPAsyncWebServer.h>
+#include <EEPROM.h>
 
 uint32_t to_int(String& msg) {
   uint32_t ans = 0;
@@ -79,17 +80,32 @@ void MeshNetwork::initialize(const __FlashStringHelper *prefix, const __FlashStr
    // Set debug messages before init() so that you can see startup messages.
    m_mesh.setDebugMsgTypes( ERROR | STARTUP );  // To enable all: ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE
    m_mesh.init( prefix, password, &taskScheduler, MeshNetwork::PORT );
+   EEPROM.begin(512);
    
-   server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
-	   String msg = "";
-       if (request->hasArg("BROADCAST")){
-         msg = request->arg("BROADCAST");
-         m_mesh.sendBroadcast(msg, true);
-       }
-       request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='BROADCAST' value='" + msg + "'><br><br><input type='submit' value='Submit'></form>");
-   });
+   server.on("/pattern", HTTP_GET, [&](AsyncWebServerRequest *request){
+    int x = atoi(request->arg("x").c_str());
+    int y = atoi(request->arg("y").c_str());
+    int p = atoi(request->arg("p").c_str());
+    String binaryString = request->arg("b");
+
+    for (int row = 0; row < 8; row++) {
+     uint8_t byte = 0;
+
+     for (int i = 0; i < 8; i++) {
+       uint8_t bit = binaryString[8 * row + i] == '1' ? 1 : 0;
+       byte = byte | bit << (7 - i);
+     }
+  
+     EEPROM.write(128 * p + 32 * y + 8 * x + row, byte);
+    }
+    
+    EEPROM.commit();
+    String msg = "PATTERN " + request->arg("p") + " " + request->arg("x") + " " + request->arg("y") + " " + binaryString;
+    request->send(200, "text/plain", "Yeah, whatever.");
+  });
+
    server.on("/debug", HTTP_GET, [&](AsyncWebServerRequest *request){
-     request->send(200, "text/html", "Frame Rate: 100hz\nMissed Frames: 0\nAnimation time: 10s\nNodes:" + to_string(m_nodes.size()) + "\nHistory:\n" + m_history);
+     request->send(200, "text/plain", "Frame Rate: 100hz\nMissed Frames: 0\nAnimation time: 10s\nNodes: Many\n");
    });
 
    //Amount of nodes actively functioning.

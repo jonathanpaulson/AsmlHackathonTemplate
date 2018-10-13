@@ -5,14 +5,14 @@
 #include "Facilities_MeshNetwork.hpp"
 #include "Tasks_Example.hpp"
 #include "Tasks_Talk.hpp"
+#include "Tasks_Flash.hpp"
 
 // Translation unit local variables
 namespace {
-
 Scheduler                  taskScheduler;
-
 Facilities::MeshNetwork    meshNetwork;
 Tasks::Example  example(meshNetwork);
+Tasks::Flash  flash;
 Tasks::Talk talk(meshNetwork);
 }
 
@@ -22,13 +22,15 @@ void setup()
    MY_DEBUG_BEGIN(115200);
 
    // Create MeshNetwork
-   meshNetwork.initialize(F("TeamOrangeThree"), F("password"), taskScheduler);
+   meshNetwork.initialize(F("TeamOrangeNine"), F("password"), taskScheduler);
 
    // Create and add tasks.
    taskScheduler.addTask(example);
    taskScheduler.addTask(talk);
+   taskScheduler.addTask(flash);
    example.enable();
    talk.enable();
+   flash.enable();
    MY_DEBUG_PRINTLN(F("Setup completed"));
 }
 
