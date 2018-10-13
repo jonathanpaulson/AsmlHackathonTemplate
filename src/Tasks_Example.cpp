@@ -127,16 +127,15 @@ void Example::execute()
    }
 }
 
-void read_pattern(vector<vector<bool>>& pat, String& pattern) {
-  assert(pat.size() > 0);
-  assert(pattern.length() == pat.size() * pat[0].size());
-  unsigned pi = 0;
-  for(unsigned r=0; r<pat.size(); r++) {
-    assert(pat[r].size() == pat[0].size());
-    for(unsigned c=0; c<pat[r].size(); c++) {
-      assert(pi < pattern.length());
-      pat[r][c] = (pattern[pi] == '1');
-      pi++;
+using pii = pair<int,int>;
+pair<int, int> read_int(String& msg, int st) {
+  int ans = 0;
+  for(int i=st;; i++) {
+    if(msg[i] == ' ') {
+      return make_pair(ans, i+1);
+    } else {
+      assert('0' <= msg[i] && msg[i] <= '9');
+      ans = ans*10 + (msg[i]-'0');
     }
   }
 }
@@ -145,15 +144,21 @@ void Example::receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg)
 {
    MY_DEBUG_PRINTF("Data received. me=%u sender=%u msg=%s\n", m_mesh.getMyNodeId(), nodeId, msg.c_str());
 
-   String prefix_a("PATTERNA ");
+   String prefix_a("PATTERN ");
    if(has_prefix(msg, prefix_a)) { 
      String pattern = remove_prefix(msg, prefix_a);
-     read_pattern(m_pattern[0], pattern);
-   }
-   String prefix_b("PATTERNB ");
-   if(has_prefix(msg, prefix_b)) {
-     String pattern = remove_prefix(msg, prefix_b);
-     read_pattern(m_pattern[1], pattern);
+     pii which = read_int(pattern, 0);
+     pii c = read_int(pattern, which.second);
+     pii r = read_int(pattern, c.second);
+     assert(pattern.length() - r.second + 1 == 64);
+     unsigned pi = r.second;
+     for(int dr=0; dr<8; dr++) {
+       for(int dc=0; dc<8; dc++) {
+         assert(pi < pattern.length());
+         m_pattern[which.first][r.first+dr][c.first+dc] = (pattern[pi] == '1');
+         pi++;
+       }
+     }
    }
 }
 
