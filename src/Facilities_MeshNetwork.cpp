@@ -35,9 +35,9 @@ String to_string(uint32_t n) {
   }
   String ans = "";
   while(n > 0) {
-	  ans = ('0' + (n%10)) + ans;
+    ans = ('0' + (n%10)) + ans;
   }
-	return ans;
+  return ans;
 }
 bool has_prefix(String& msg, String& prefix) {
   if(msg.length() < prefix.length()) { return false; }
@@ -62,13 +62,11 @@ String remove_prefix(String& msg, String& prefix) {
 namespace Facilities {
 
 const uint16_t MeshNetwork::PORT = 5555;
-AsyncWebServer server(80);
 
 //! Construct only.
 //! \note Does not construct and initialize in one go to be able to initialize after serial debug port has been opened.
 MeshNetwork::MeshNetwork()
 {
-   m_mesh.onReceive(std::bind(&MeshNetwork::receivedCb, this, std::placeholders::_1, std::placeholders::_2));
    //m_mesh.onNewConnection(...);
    //m_mesh.onChangedConnections(...);
    //m_mesh.onNodeTimeAdjusted(...);
@@ -128,29 +126,18 @@ void MeshNetwork::sendBroadcast(String &message, bool include_self)
 
 MeshNetwork::NodeId MeshNetwork::getMyNodeId()
 {
-   return m_mesh.getNodeId();
+  return m_mesh.getNodeId();
+}
+uint32_t MeshNetwork::getNodeTime() {
+  return m_mesh.getNodeTime();
+}
+std::list<uint32_t> MeshNetwork::getNodeList() {
+  return m_mesh.getNodeList();
 }
 
 void MeshNetwork::onReceive(receivedCallback_t receivedCallback)
 {
    m_mesh.onReceive(receivedCallback);
 }
-
-set<MeshNetwork::NodeId> MeshNetwork::getNodes() { return m_nodes; }
-
-void MeshNetwork::receivedCb(NodeId transmitterNodeId, String& msg)
-{
-   MY_DEBUG_PRINTF("Data received from node: %u; msg: %s\n", transmitterNodeId, msg.c_str());
-   String node_prefix("NODE ");
-   if(has_prefix(msg, node_prefix)) {
-     String nodeid_s = remove_prefix(msg, node_prefix);
-     NodeId nodeid = to_int(nodeid_s);
-     if(m_nodes.count(nodeid) == 0) {
-       m_history += "Node joined the mesh: " + nodeid_s;
-       m_nodes.insert(nodeid);
-     }
-   }
-}
-
 
 } // namespace Facilities

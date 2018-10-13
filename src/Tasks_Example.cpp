@@ -32,7 +32,11 @@ Example::Example(Facilities::MeshNetwork& mesh) :
 //! Update display
 void Example::execute()
 {
-   std::set<uint32_t> nodes = m_mesh.getNodes();
+
+   std::list<uint32_t> nodes_list = m_mesh.getNodeList(); 
+   std::set<uint32_t> nodes(nodes_list.begin(), nodes_list.end());
+   nodes.insert(m_mesh.getMyNodeId());
+
    int n = nodes.size();
    int my_idx = 0;
    for(auto& node : nodes) {

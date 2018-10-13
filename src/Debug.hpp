@@ -8,8 +8,6 @@
 
 #pragma once
 
-#define MY_DEBUG
-
 #ifdef MY_DEBUG
    #define MY_DEBUG_BEGIN(baudRate) Serial.begin(baudRate)
    #define MY_DEBUG_PRINT(...) Serial.print(__VA_ARGS__)

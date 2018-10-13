@@ -31,9 +31,9 @@ public:
    ~Example() {};
 
    // Disallow copy-ing
-	Example(const Example& other) = delete;
-	Example(Example&& other) = delete;
-	Example& operator=(const Example& other) = delete;
+  Example(const Example& other) = delete;
+  Example(Example&& other) = delete;
+  Example& operator=(const Example& other) = delete;
 
    void execute();
 
@@ -43,7 +43,9 @@ private:
 
    Facilities::MeshNetwork& m_mesh;
 
-   vector<vector<vector<int>>> m_pattern;
+   int m_t = 0;
+   vector<vector<vector<bool>>> m_pattern;
+   vector<int> m_intensities;
 
    void receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg);
    void changedConnections();
