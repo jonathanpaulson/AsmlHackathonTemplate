@@ -52,7 +52,8 @@ private:
    LEDMatrixDriver m_lmd;
 
    int m_t = 0;
-   vector<vector<vector<int>>> m_pattern;
+   vector<vector<vector<bool>>> m_pattern;
+   vector<int> m_intensities;
 
    void receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg);
    void changedConnections();

@@ -12,6 +12,7 @@
 #include "painlessMesh.h"
 #include <functional>
 #include <set>
+#include <map>
 
 uint32_t to_int(String& msg);
 String to_string(uint32_t n);
@@ -51,6 +52,7 @@ public:
 private:
    static const uint16_t PORT;
    set<uint32_t> m_nodes;
+   std::map<uint32_t, uint32_t> m_node_times;
    String m_history;
 
    painlessMesh       m_mesh;

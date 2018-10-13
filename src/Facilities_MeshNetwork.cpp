@@ -124,6 +124,7 @@ set<MeshNetwork::NodeId> MeshNetwork::getNodes() { return m_nodes; }
 
 void MeshNetwork::receivedCb(NodeId transmitterNodeId, String& msg)
 {
+   uint32_t now = getNodeTime();
    MY_DEBUG_PRINTF("Data received from node: %u; msg: %s\n", transmitterNodeId, msg.c_str());
    String node_prefix("NODE ");
    if(has_prefix(msg, node_prefix)) {
@@ -132,6 +133,7 @@ void MeshNetwork::receivedCb(NodeId transmitterNodeId, String& msg)
      if(m_nodes.count(nodeid) == 0) {
        m_history += "Node joined the mesh: " + nodeid_s;
        m_nodes.insert(nodeid);
+       m_node_times[nodeid] = now;
      }
    }
 }
