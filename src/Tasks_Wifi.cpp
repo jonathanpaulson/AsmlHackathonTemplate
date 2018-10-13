@@ -30,6 +30,7 @@ namespace Tasks {
 
 void Wifi::execute()
 {
+/*
    std::list<uint32_t> nodes_list = m_mesh.getNodeList();
    std::set<uint32_t> new_nodes(nodes_list.begin(), nodes_list.end());
    for(auto& node : new_nodes) {
@@ -47,6 +48,7 @@ void Wifi::execute()
      }
    }
    m_nodes = new_nodes;
+   */
 
    /*String pattern = "PATTERN ";
    for(int r=0; r<8; r++) {
