@@ -30,9 +30,9 @@ public:
    ~MeshNetwork() {};
 
    // Disallow copy-ing
-	MeshNetwork(const MeshNetwork& other) = delete;
-	MeshNetwork(MeshNetwork&& other) = delete;
-	MeshNetwork& operator=(const MeshNetwork& other) = delete;
+  MeshNetwork(const MeshNetwork& other) = delete;
+  MeshNetwork(MeshNetwork&& other) = delete;
+  MeshNetwork& operator=(const MeshNetwork& other) = delete;
 
    void update();
    void initialize(const __FlashStringHelper *prefix, const __FlashStringHelper *password, Scheduler& taskScheduler);
@@ -40,9 +40,11 @@ public:
    void sendBroadcast(String& message, bool include_self);
    NodeId getMyNodeId();
    set<NodeId> getNodes();
+   uint32_t getNodeTime();
 
    void onReceive(receivedCallback_t receivedCallback);
    void onChangedConnections();
+   void receivedCb(NodeId transmitterNodeId, String& msg);
 
 
 
@@ -53,7 +55,6 @@ private:
 
    painlessMesh       m_mesh;
 
-   void receivedCb(NodeId transmitterNodeId, String& msg);
 
 
 };

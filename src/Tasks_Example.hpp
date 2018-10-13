@@ -32,9 +32,9 @@ public:
    ~Example() {};
 
    // Disallow copy-ing
-	Example(const Example& other) = delete;
-	Example(Example&& other) = delete;
-	Example& operator=(const Example& other) = delete;
+  Example(const Example& other) = delete;
+  Example(Example&& other) = delete;
+  Example& operator=(const Example& other) = delete;
 
    void execute();
 
@@ -51,6 +51,7 @@ private:
    Facilities::MeshNetwork& m_mesh;
    LEDMatrixDriver m_lmd;
 
+   int m_t = 0;
    vector<vector<vector<int>>> m_pattern;
 
    void receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg);

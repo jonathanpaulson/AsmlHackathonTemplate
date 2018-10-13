@@ -38,17 +38,20 @@ Example::Example(Facilities::MeshNetwork& mesh) :
    m_mesh.onReceive(std::bind(&Example::receivedCb, this, std::placeholders::_1, std::placeholders::_2));
    //m_mesh.onChangedConnections(std::bind(&Example::changedConnections, this));
    m_pattern = vector<vector<vector<int>>>{};
-	 for(int n=1; n<=4; n++) {
-	   m_pattern.push_back(vector<vector<int>>{});
-	   for(int r=0; r<SQ*n; r++) {
-		   m_pattern[n-1].push_back(vector<int>{});
-		   for(int c=0; c<SQ*n; c++) {
-			   m_pattern[n-1][r].push_back(false);
-			 }
-		 }
-	 }
-   m_pattern[0][0][0] = true;
-   m_pattern[0][0][1] = true;
+   for(int n=1; n<=4; n++) {
+     m_pattern.push_back(vector<vector<int>>{});
+     for(int r=0; r<SQ*n; r++) {
+       m_pattern[n-1].push_back(vector<int>{});
+       for(int c=0; c<SQ*n; c++) {
+         m_pattern[n-1][r].push_back(false);
+       }
+     }
+   }
+   for(int r=0; r<SQ; r++) {
+     for(int c=0; c<SQ; c++) {
+       m_pattern[0][r][c] = ((r+c)%2 == 1);
+     }
+   }
 }
 
 // 24-31 16-23 8-15 0-7
@@ -76,19 +79,22 @@ void Example::execute()
      }
      my_idx++;
    }
-   String pat;
-   for(int r=0; r<SQ*n; r++) {
-     for(int c=0; c<SQ*n; c++) {
-       pat += (m_pattern[n-1][r][c] ? "1" : "0");
+
+   if(m_t % 100 == 0) {
+     String pat;
+     for(int r=0; r<SQ*n; r++) {
+       for(int c=0; c<SQ*n; c++) {
+         pat += (m_pattern[0][r/n][c/n] ? "1" : "0");
+       }
      }
+     MY_DEBUG_PRINTF("Execute me=%u n=%d my_idx=%d pattern=%s\n", m_mesh.getMyNodeId(), n, my_idx, pat.c_str());
    }
-   MY_DEBUG_PRINTF("Execute me=%u n=%d my_idx=%d pattern=%s\n", m_mesh.getMyNodeId(), n, my_idx, pat.c_str());
 
    m_lmd.clear();
    for(int r=0; r<SQ*n; r++) {
      for(int c=0; c<SQ*n; c++) {
        if(r/SQ == my_idx) {
-	       m_lmd.setPixel(fix_col(c), r%8, m_pattern[n-1][r][c]);
+         m_lmd.setPixel(fix_col(c), r%8, m_pattern[0][r/n][c/n]);
        }
      }
    }
@@ -102,15 +108,19 @@ void Example::receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg)
    String prefix("PATTERN ");
    if(has_prefix(msg, prefix)) { 
      String pattern = remove_prefix(msg, prefix);
-     assert(pattern.length() == 32*32 + 24*24 + 16*16 + 8*8);
-		 for(int n=4; n>=1; n--) {
-		    for(int r=0; r<SQ*n; r++) {
-				  for(int c=0; c<SQ*n; c++) {
-					  m_pattern[n-1][r][c] = (pattern[r*8+c]=='1');
-					}
-				}
-		 }
+     assert(pattern.length() == 8*8);
+     unsigned pi = 0;
+     for(int n=1; n>=1; n--) {
+        for(int r=0; r<SQ*n; r++) {
+          for(int c=0; c<SQ*n; c++) {
+            assert(pi < pattern.length());
+            m_pattern[n-1][r][c] = (pattern[pi]=='1');
+            pi++;
+          }
+        }
+     }
    }
+   m_mesh.receivedCb(nodeId, msg);
 }
 
 } // namespace Tasks

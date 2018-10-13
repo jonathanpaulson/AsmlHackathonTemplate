@@ -34,9 +34,9 @@ String to_string(uint32_t n) {
   }
   String ans = "";
   while(n > 0) {
-	  ans = ('0' + (n%10)) + ans;
+    ans = ('0' + (n%10)) + ans;
   }
-	return ans;
+  return ans;
 }
 bool has_prefix(String& msg, String& prefix) {
   if(msg.length() < prefix.length()) { return false; }
@@ -67,7 +67,6 @@ AsyncWebServer server(80);
 //! \note Does not construct and initialize in one go to be able to initialize after serial debug port has been opened.
 MeshNetwork::MeshNetwork()
 {
-   m_mesh.onReceive(std::bind(&MeshNetwork::receivedCb, this, std::placeholders::_1, std::placeholders::_2));
    //m_mesh.onNewConnection(...);
    //m_mesh.onChangedConnections(...);
    //m_mesh.onNodeTimeAdjusted(...);
@@ -81,7 +80,7 @@ void MeshNetwork::initialize(const __FlashStringHelper *prefix, const __FlashStr
    m_mesh.init( prefix, password, &taskScheduler, MeshNetwork::PORT );
    
    server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
-	   String msg = "";
+     String msg = "";
        if (request->hasArg("BROADCAST")){
          msg = request->arg("BROADCAST");
          m_mesh.sendBroadcast(msg, true);
@@ -92,10 +91,8 @@ void MeshNetwork::initialize(const __FlashStringHelper *prefix, const __FlashStr
      request->send(200, "text/html", "Frame Rate: 100hz\nMissed Frames: 0\nAnimation time: 10s\nNodes:" + to_string(m_nodes.size()) + "\nHistory:\n" + m_history);
    });
 
-   //Amount of nodes actively functioning.
-   //History record of removed and added nodes since the system became active (i.e. running with at least one node).
-   
    server.begin();
+   m_nodes.insert(getMyNodeId());
 }
 
 //! Update mesh; forward call to painlessMesh.
@@ -113,6 +110,9 @@ void MeshNetwork::sendBroadcast(String &message, bool include_self)
 MeshNetwork::NodeId MeshNetwork::getMyNodeId()
 {
    return m_mesh.getNodeId();
+}
+uint32_t MeshNetwork::getNodeTime() {
+   return m_mesh.getNodeTime();
 }
 
 void MeshNetwork::onReceive(receivedCallback_t receivedCallback)
