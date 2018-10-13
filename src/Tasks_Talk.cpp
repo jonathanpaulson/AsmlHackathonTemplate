@@ -20,13 +20,14 @@ void Talk::execute()
    msg += m_mesh.getMyNodeId();
    m_mesh.sendBroadcast(msg, true);
 
-   String pattern = "PATTERN ";
+   /*String pattern = "PATTERN ";
    for(int r=0; r<8; r++) {
      for(int c=0; c<8; c++) {
-       pattern += (r<=1 || r>=6 || c<=1 || c>=6 ? "1" : "0");
+       pattern += (-r <= c-4 && c-4 <= r ? "1" : "0");
      }
    }
    m_mesh.sendBroadcast(pattern, true);
+	 */
 
 /*
    String pattern = "PATTERN ";

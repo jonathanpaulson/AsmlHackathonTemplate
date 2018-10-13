@@ -32,15 +32,14 @@ public:
    ~Example() {};
 
    // Disallow copy-ing
-	Example(const Example& other) = delete;
-	Example(Example&& other) = delete;
-	Example& operator=(const Example& other) = delete;
+  Example(const Example& other) = delete;
+  Example(Example&& other) = delete;
+  Example& operator=(const Example& other) = delete;
 
    void execute();
 
 private:
-   static const int PAT_WIDTH;
-   static const int PAT_HEIGHT;
+   static const int SQ;
 
    static const int LEDMATRIX_WIDTH;
    static const int LEDMATRIX_HEIGHT;
@@ -52,8 +51,8 @@ private:
    Facilities::MeshNetwork& m_mesh;
    LEDMatrixDriver m_lmd;
 
-   std::set<uint32_t> m_nodes;
-   vector<vector<int>> m_pattern;
+   int m_t = 0;
+   vector<vector<vector<int>>> m_pattern;
 
    void receivedCb(Facilities::MeshNetwork::NodeId nodeId, String& msg);
    void changedConnections();
