@@ -13,15 +13,6 @@
 #include "painlessMesh.h"
 #include <cassert>
 
-#ifdef ESP8266
-#include "Hash.h"
-#include <ESPAsyncTCP.h>
-#else
-#include <AsyncTCP.h>
-#endif
-#include <ESPAsyncWebServer.h>
-#include <EEPROM.h>
-
 uint32_t to_int(String& msg) {
   uint32_t ans = 0;
   for(unsigned i=0; i<msg.length(); i++) {
@@ -62,7 +53,6 @@ String remove_prefix(String& msg, String& prefix) {
 namespace Facilities {
 
 const uint16_t MeshNetwork::PORT = 5555;
-AsyncWebServer server(80);
 
 //! Construct only.
 //! \note Does not construct and initialize in one go to be able to initialize after serial debug port has been opened.
@@ -79,38 +69,6 @@ void MeshNetwork::initialize(const __FlashStringHelper *prefix, const __FlashStr
    // Set debug messages before init() so that you can see startup messages.
    m_mesh.setDebugMsgTypes( ERROR | STARTUP );  // To enable all: ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE
    m_mesh.init( prefix, password, &taskScheduler, MeshNetwork::PORT );
-   EEPROM.begin(512);
-   
-   server.on("/pattern", HTTP_GET, [&](AsyncWebServerRequest *request){
-    int x = atoi(request->arg("x").c_str());
-    int y = atoi(request->arg("y").c_str());
-    int p = atoi(request->arg("p").c_str());
-    String binaryString = request->arg("b");
-
-    for (int row = 0; row < 8; row++) {
-     uint8_t byte = 0;
-
-     for (int i = 0; i < 8; i++) {
-       uint8_t bit = binaryString[8 * row + i] == '1' ? 1 : 0;
-       byte = byte | bit << (7 - i);
-     }
-  
-     EEPROM.write(128 * p + 32 * y + 8 * x + row, byte);
-    }
-    
-    EEPROM.commit();
-    String msg = "PATTERN " + request->arg("p") + " " + request->arg("x") + " " + request->arg("y") + " " + binaryString;
-    request->send(200, "text/plain", "Yeah, whatever.");
-  });
-
-   server.on("/debug", HTTP_GET, [&](AsyncWebServerRequest *request){
-     request->send(200, "text/plain", "Frame Rate: 100hz\nMissed Frames: 0\nAnimation time: 10s\nNodes: Many\n");
-   });
-
-   //Amount of nodes actively functioning.
-   //History record of removed and added nodes since the system became active (i.e. running with at least one node).
-   
-   server.begin();
 }
 
 //! Update mesh; forward call to painlessMesh.

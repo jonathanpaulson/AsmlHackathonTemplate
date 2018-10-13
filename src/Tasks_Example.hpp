@@ -13,6 +13,7 @@
 #include "Debug.hpp"
 
 #include <painlessMesh.h>
+#include <LEDMatrixDriver.hpp>
 
 #include <functional>
 #include <vector>
@@ -39,9 +40,16 @@ public:
 
 private:
    static const int SQ;
+
+   static const int LEDMATRIX_WIDTH;
+   static const int LEDMATRIX_HEIGHT;
+   static const int LEDMATRIX_SEGMENTS;
+   static const int LEDMATRIX_INTENSITY;
+   static const int LEDMATRIX_CS_PIN;
    static const unsigned long POLL_DELAY_MS;
 
    Facilities::MeshNetwork& m_mesh;
+   LEDMatrixDriver m_lmd;
 
    int m_t = 0;
    vector<vector<vector<bool>>> m_pattern;
