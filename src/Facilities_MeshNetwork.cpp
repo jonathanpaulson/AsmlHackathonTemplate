@@ -13,14 +13,6 @@
 #include "painlessMesh.h"
 #include <cassert>
 
-#ifdef ESP8266
-#include "Hash.h"
-#include <ESPAsyncTCP.h>
-#else
-#include <AsyncTCP.h>
-#endif
-#include <ESPAsyncWebServer.h>
-
 uint32_t to_int(String& msg) {
   uint32_t ans = 0;
   for(unsigned i=0; i<msg.length(); i++) {
@@ -61,7 +53,6 @@ String remove_prefix(String& msg, String& prefix) {
 namespace Facilities {
 
 const uint16_t MeshNetwork::PORT = 5555;
-AsyncWebServer server(80);
 
 //! Construct only.
 //! \note Does not construct and initialize in one go to be able to initialize after serial debug port has been opened.
@@ -78,21 +69,6 @@ void MeshNetwork::initialize(const __FlashStringHelper *prefix, const __FlashStr
    // Set debug messages before init() so that you can see startup messages.
    m_mesh.setDebugMsgTypes( ERROR | STARTUP );  // To enable all: ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE
    m_mesh.init( prefix, password, &taskScheduler, MeshNetwork::PORT );
-   
-   server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
-     String msg = "";
-       if (request->hasArg("BROADCAST")){
-         msg = request->arg("BROADCAST");
-         m_mesh.sendBroadcast(msg, true);
-       }
-       request->send(200, "text/html", "<form>Text to Broadcast<br><input type='text' name='BROADCAST' value='" + msg + "'><br><br><input type='submit' value='Submit'></form>");
-   });
-   server.on("/debug", HTTP_GET, [&](AsyncWebServerRequest *request){
-     request->send(200, "text/html", "Frame Rate: 100hz\nMissed Frames: 0\nAnimation time: 10s\nNodes:" + to_string(m_nodes.size()) + "\nHistory:\n" + m_history);
-   });
-
-   server.begin();
-   m_nodes.insert(getMyNodeId());
 }
 
 //! Update mesh; forward call to painlessMesh.
@@ -109,32 +85,18 @@ void MeshNetwork::sendBroadcast(String &message, bool include_self)
 
 MeshNetwork::NodeId MeshNetwork::getMyNodeId()
 {
-   return m_mesh.getNodeId();
+  return m_mesh.getNodeId();
 }
 uint32_t MeshNetwork::getNodeTime() {
-   return m_mesh.getNodeTime();
+  return m_mesh.getNodeTime();
+}
+std::list<uint32_t> MeshNetwork::getNodeList() {
+  return m_mesh.getNodeList();
 }
 
 void MeshNetwork::onReceive(receivedCallback_t receivedCallback)
 {
    m_mesh.onReceive(receivedCallback);
 }
-
-set<MeshNetwork::NodeId> MeshNetwork::getNodes() { return m_nodes; }
-
-void MeshNetwork::receivedCb(NodeId transmitterNodeId, String& msg)
-{
-   MY_DEBUG_PRINTF("Data received from node: %u; msg: %s\n", transmitterNodeId, msg.c_str());
-   String node_prefix("NODE ");
-   if(has_prefix(msg, node_prefix)) {
-     String nodeid_s = remove_prefix(msg, node_prefix);
-     NodeId nodeid = to_int(nodeid_s);
-     if(m_nodes.count(nodeid) == 0) {
-       m_history += "Node joined the mesh: " + nodeid_s;
-       m_nodes.insert(nodeid);
-     }
-   }
-}
-
 
 } // namespace Facilities

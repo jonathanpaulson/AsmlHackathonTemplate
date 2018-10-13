@@ -16,9 +16,9 @@ namespace Tasks {
 
 void Talk::execute()
 {
-   String msg = "NODE ";
+   /*String msg = "NODE ";
    msg += m_mesh.getMyNodeId();
-   m_mesh.sendBroadcast(msg, true);
+   m_mesh.sendBroadcast(msg, true);*/
 
    /*String pattern = "PATTERN ";
    for(int r=0; r<8; r++) {
